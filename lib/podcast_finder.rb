@@ -1,5 +1,13 @@
-require "podcast_finder/version"
+require_relative 'podcast_finder/version'
+require 'date'
+require 'open-uri'
+require 'nokogiri'
+require 'colorize'
 
-module PodcastFinder
-  # Your code goes here...
-end
+require_relative 'podcast_finder/category'
+require_relative 'podcast_finder/commandline'
+require_relative 'podcast_finder/episode'
+require_relative 'podcast_finder/importer'
+require_relative 'podcast_finder/podcast'
+require_relative 'podcast_finder/scraper'
+require_relative 'podcast_finder/station'
