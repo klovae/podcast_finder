@@ -83,7 +83,7 @@ class PodcastFinder::CLI
       @continue = "EXIT"
     when @input == "BACK" || @input == "MORE" || @input == "PODCASTS"
       @input
-    when @input == Fixnum
+    when @input == Fixnum && @input >= 1
       @input
     end
   end
@@ -130,7 +130,7 @@ class PodcastFinder::CLI
 
   def display_podcasts
     @listed_podcasts = @category_choice.list_podcasts(@podcast_counter)
-    if @listed_podcasts == 10
+    if @listed_podcasts == 10 && @category_choice.podcasts.size > @podcast_counter + @listed_podcasts
       puts ""
       puts "Enter the number of the podcast you'd like to check out (1-#{@podcast_counter + @listed_podcasts})".colorize(:light_blue)
       puts "Type 'menu' to return to the category list".colorize(:light_blue)
@@ -138,15 +138,16 @@ class PodcastFinder::CLI
     else
       puts ""
       puts "That's all the podcasts for this category!".colorize(:light_blue)
-      puts "Choose a podcast (1-#{@podcast_counter + @listed_podcasts}) to get details or type 'back' to return to the category list".colorize(:light_blue)
+      puts "Enter the number of the podcast you'd like to check out (1-#{@podcast_counter + @listed_podcasts})".colorize(:light_blue)
+      puts "Type 'menu' to return to the category list".colorize(:light_blue)
     end
   end
 
   def choose_podcast
     self.get_input
-    if @input.class == Fixnum && @input.between?(@podcast_counter, @podcast_counter + @listed_podcasts)
+    if @input.class == Fixnum && @input.between?(1, @podcast_counter + @listed_podcasts)
       self.display_podcast_info
-    elsif @input.class == Fixnum && !@input.between?(@podcast_counter, @podcast_counter + @listed_podcasts)
+    elsif @input.class == Fixnum && !@input.between?(1, @podcast_counter + @listed_podcasts)
       puts "Sorry, that's not an option. Please choose a number that corresponds to a podcast or type 'more' to see more podcasts.".colorize(:light_blue)
       self.choose_podcast
     elsif @input == "MENU"
@@ -156,6 +157,9 @@ class PodcastFinder::CLI
       @podcast_counter += 10
       self.browse_category
     else
+      if @input == "BACK"
+        @input = "MENU"
+      end
       self.proceed_based_on_input
       self.choose_podcast unless @continue == "EXIT"
     end
@@ -277,7 +281,7 @@ class PodcastFinder::CLI
       @episode_choice = nil
       self.browse_category
     else
-      if @input == "MORE"
+      if @input == "MORE" || @input.class == Fixnum
         @input = "STUCK"
       end
       self.proceed_based_on_input
