@@ -5,7 +5,7 @@ require 'podcast_finder/version'
 
 Gem::Specification.new do |spec|
   spec.name           = 'podcast_finder'
-  spec.version        = '0.1.11'
+  spec.version        = PodcastFinder::VERSION
   spec.license        = 'MIT'
 
   spec.summary        = "CLI gem for finding NPR podcasts"

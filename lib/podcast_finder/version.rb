@@ -1,3 +1,3 @@
-module PodcastFinder
-  VERSION = "0.1.0"
+class PodcastFinder
+  VERSION = "0.1.2"
 end

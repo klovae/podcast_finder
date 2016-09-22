@@ -15,7 +15,7 @@ class PodcastFinder::Podcast
   end
 
   def add_category(category)
-    if category.class == Category && !self.categories.include?(category)
+    if category.class == PodcastFinder::Category && !self.categories.include?(category)
       @categories << category
     end
   end
@@ -26,7 +26,7 @@ class PodcastFinder::Podcast
   end
 
   def station=(station)
-    if station.class == Station
+    if station.class == PodcastFinder::Station
       @station = station
     end
   end

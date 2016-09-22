@@ -52,8 +52,6 @@ class PodcastFinder::CLI
     puts "--Type 'exit' at any time to quit the browser"
     puts "--Type 'menu' at any time to go back to the main category menu"
     puts "--Type 'help' if you need a quick reminder about the commands"
-    self.get_input
-    self.proceed_based_on_input
   end
 
   #methods for gets-ing, parsing and acting based on user input
@@ -114,6 +112,9 @@ class PodcastFinder::CLI
         puts "Sorry, that's not a category. Please enter a number between 1 and 16"
         self.choose_category
       else
+        if @input == "BACK"
+          @input = "MENU"
+        end
         self.proceed_based_on_input
         self.choose_category unless @continue == "EXIT"
       end
@@ -185,7 +186,8 @@ class PodcastFinder::CLI
     elsif @input == "MENU"
       self.proceed_based_on_input
     else
-      @input = "STUCK" unless @input == "EXIT"
+
+      @input = "STUCK" unless @input == "EXIT" || @input == "HELP"
       self.proceed_based_on_input
       self.choose_podcast_action unless @continue == "EXIT"
     end
@@ -225,7 +227,9 @@ class PodcastFinder::CLI
     elsif @input == "MENU"
       self.proceed_based_on_input
     else
-      @input = "STUCK" unless @input == "EXIT"
+      if @input == "MORE"
+        @input = "STUCK"
+      end
       self.proceed_based_on_input
       self.choose_action_no_episodes unless @continue == "EXIT"
     end
@@ -243,7 +247,6 @@ class PodcastFinder::CLI
       @podcast_counter = 0
       self.browse_category
     else
-      self.proceed_based_on_input
       if @input == "MORE"
         @input = "STUCK"
       end

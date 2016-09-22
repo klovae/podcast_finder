@@ -13,7 +13,7 @@ class PodcastFinder::Station
   end
 
   def add_podcast(podcast)
-    if podcast.class == Podcast
+    if podcast.class == PodcastFinder::Podcast
       @podcasts << podcast
       podcast.station = self
     end
