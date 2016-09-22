@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'podcast_finder/version'
 
 Gem::Specification.new do |spec|
-  spec.name           = 'podcast-finder'
+  spec.name           = 'podcast_finder'
   spec.version        = '0.1.11'
   spec.license        = 'MIT'
 
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.homepage       = 'https://github.com/klovae/podcast-finder-gem'
 
   spec.files          = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.executables    = ['podcast-finder']
+  spec.executables    = ['podcast_finder']
   spec.require_paths  = ['lib']
 
   spec.post_install_message = "Thanks for installing! Happy listening."
