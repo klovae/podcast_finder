@@ -1,3 +1,3 @@
 class PodcastFinder
-  VERSION = "0.1.2"
+  VERSION = "0.1.12"
 end
