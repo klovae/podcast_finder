@@ -34,11 +34,7 @@ class PodcastFinder::Scraper
 			self.scrape_page(scrape_url)
 			if !@index.css('article').first.nil?
 				active_podcasts = @index.css('article.podcast-active')
-				active_podcasts.each do |podcast|
-					if !podcasts.include?(self.get_podcast_data(podcast))
-						podcasts << self.get_podcast_data(podcast)
-					end
-				end
+				active_podcasts.each {|podcast| podcasts << self.get_podcast_data(podcast)}
 				counter += @index.css('article').size
 			else
 				counter = "done"
