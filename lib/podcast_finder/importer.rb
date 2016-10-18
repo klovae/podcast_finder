@@ -1,10 +1,5 @@
 class PodcastFinder::DataImporter
 
-  def self.import_categories(index_url)
-    category_data = PodcastFinder::Scraper.new.scrape_category_list(index_url)
-    PodcastFinder::Category.create_from_collection(category_data)
-  end
-
   def self.import_podcast_data(category)
     podcast_array = PodcastFinder::Scraper.new.scrape_podcasts(category.url)
     self.import_stations(podcast_array)

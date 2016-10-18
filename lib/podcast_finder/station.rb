@@ -19,6 +19,15 @@ class PodcastFinder::Station
     end
   end
 
+  def self.new_from_collection(podcasts)
+    podcasts.each do |podcast_hash|
+			check_station = podcast_hash[:station]
+			if self.find_by_name(check_station).nil?
+				station = self.new(podcast_hash)
+			end
+		end
+  end
+
   def save
     @@all << self
   end

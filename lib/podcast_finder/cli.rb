@@ -18,7 +18,7 @@ class PodcastFinder::CLI
 
   def startup_sequence
     puts "Setting up your command line podcast finder...".colorize(:light_red)
-    self.start_import
+    PodcastFinder::Scraper.scrape_category_lis
     sleep(0.5)
     puts ".".colorize(:light_red)
     sleep(0.5)
@@ -32,10 +32,6 @@ class PodcastFinder::CLI
     puts "Welcome to the Command Line Podcast Finder!"
     puts "You can use this command line gem to find and listen to interesting podcasts produced by NPR and affiliated stations."
     sleep(0.5)
-  end
-
-  def start_import
-    PodcastFinder::DataImporter.import_categories('http://www.npr.org/podcasts')
   end
 
   #basic menu display methods
@@ -52,7 +48,18 @@ class PodcastFinder::CLI
     puts "--Type 'exit' at any time to quit the browser"
     puts "--Type 'menu' at any time to go back to the main category menu"
     puts "--Type 'help' if you need a quick reminder about the commands"
-    puts "To proceed, enter a command from above or type 'continue' to return to what you were doing".colorize(:light_blue)
+    puts "To proceed, enter a command from above or type 'back' to return to what you were doing".colorize(:light_blue)
+    self.choose_after_help
+  end
+
+  def choose_after_help
+    self.get_input
+    if @input == "MENU" || @input == "EXIT" || @input == "HELP" || @input == "BACK"
+      self.proceed_based_on_input
+    else
+      puts "Sorry, that's not an option. Please type a command from the help menu or type 'back' to return to what you were doing".colorize(:light_blue)
+      self.choose_after_help
+    end
   end
 
   #methods for gets-ing, parsing and acting based on user input
@@ -65,7 +72,7 @@ class PodcastFinder::CLI
   def parse_input(input)
     if input.match(/^\d+$/)
       @input = input.to_i
-    elsif input.upcase == "HELP" || input.upcase == "MENU" || input.upcase == "EXIT" || input.upcase == "MORE" || input.upcase == "BACK" || input.upcase == "PODCASTS" || input.upcase == "CONTINUE"
+    elsif input.upcase == "HELP" || input.upcase == "MENU" || input.upcase == "EXIT" || input.upcase == "MORE" || input.upcase == "BACK" || input.upcase == "PODCASTS"
       @input = input.upcase
     else
       @input = "STUCK"
@@ -78,13 +85,11 @@ class PodcastFinder::CLI
       puts "Sorry, that's not an option. Please type a command from the options above. Stuck? Type 'help'.".colorize(:light_blue)
     when "HELP"
       self.help
-      self.get_input
-      self.proceed_based_on_input
     when "MENU"
       self.browse_all_categories
-    when "YES"
+    when "EXIT"
       @quit = "YES"
-    when @input == "BACK" || @input == "MORE" || @input == "PODCASTS" || @input == "CONTINUE"
+    when @input == "BACK" || @input == "MORE" || @input == "PODCASTS"
       @input
     when @input == Fixnum && @input >= 1
       @input
@@ -116,11 +121,12 @@ class PodcastFinder::CLI
         puts "Sorry, that's not a category. Please enter a number between 1 and 16"
         self.choose_category
       else
+        @input = "STUCK" unless @input == "EXIT" || @input == "HELP" || @input == "BACK"
         if @input == "BACK"
           @input = "MENU"
         elsif @input == "HELP"
           self.proceed_based_on_input
-          if @input == "CONTINUE"
+          if @input == "BACK"
             self.browse_all_categories
           end
         end
@@ -155,9 +161,10 @@ class PodcastFinder::CLI
   def choose_podcast
     self.get_input
     if @input.class == Fixnum && @input.between?(1, @podcast_counter + @listed_podcasts)
+      @podcast_choice = @category_choice.podcasts[@input - 1]
       self.display_podcast_info
     elsif @input.class == Fixnum && !@input.between?(1, @podcast_counter + @listed_podcasts)
-      puts "Sorry, that's not an option. Please choose a number that corresponds to a podcast or type 'more' to see more podcasts.".colorize(:light_blue)
+      puts "Sorry, that's not an option. Please choose a number that corresponds to a podcast.".colorize(:light_blue)
       self.choose_podcast
     elsif @input == "MENU"
       @category_choice = nil
@@ -166,11 +173,12 @@ class PodcastFinder::CLI
       @podcast_counter += 10
       self.browse_category
     else
+      @input = "STUCK" unless @input == "EXIT" || @input == "HELP" || @input == "BACK"
       if @input == "BACK"
         @input = "MENU"
       elsif @input == "HELP"
         self.proceed_based_on_input
-        if @input == "CONTINUE"
+        if @input == "BACK"
           self.browse_category
         end
       end
@@ -181,8 +189,7 @@ class PodcastFinder::CLI
 
 #methods for getting details on a specific podcast
   def display_podcast_info
-    @podcast_choice = @category_choice.podcasts[@input - 1]
-    puts "Loading #{@podcast_choice.name}"
+    puts "Loading details for #{@podcast_choice.name}..."
     PodcastFinder::DataImporter.import_description(@podcast_choice)
     puts ""
     @podcast_choice.list_data
@@ -204,15 +211,20 @@ class PodcastFinder::CLI
     elsif @input == "MENU"
       self.proceed_based_on_input
     else
-
       @input = "STUCK" unless @input == "EXIT" || @input == "HELP"
+      if @input == "HELP"
+        self.proceed_based_on_input
+        if @input == "BACK"
+          self.display_podcast_info
+        end
+      end
       self.proceed_based_on_input
       self.choose_podcast_action unless @quit == "YES"
     end
   end
 
   def display_episode_list
-    puts "Getting episodes for #{@podcast_choice.name}"
+    puts "Getting episodes for #{@podcast_choice.name}..."
     PodcastFinder::DataImporter.import_episodes(@podcast_choice)
     if !@podcast_choice.episodes.empty?
       puts ""
@@ -245,8 +257,12 @@ class PodcastFinder::CLI
     elsif @input == "MENU"
       self.proceed_based_on_input
     else
-      if @input == "MORE"
-        @input = "STUCK"
+      @input = "STUCK" unless @input == "EXIT" || @input == "HELP"
+      if @input == "HELP"
+        self.proceed_based_on_input
+        if @input == "BACK"
+          self.display_episode_list
+        end
       end
       self.proceed_based_on_input
       self.choose_action_no_episodes unless @quit == "YES"
@@ -265,8 +281,12 @@ class PodcastFinder::CLI
       @podcast_counter = 0
       self.browse_category
     else
-      if @input == "MORE"
-        @input = "STUCK"
+      @input = "STUCK" unless @input == "EXIT" || @input == "HELP"
+      if @input == "HELP"
+        self.proceed_based_on_input
+        if @input == "BACK"
+          self.display_episode_list
+        end
       end
       self.proceed_based_on_input
       self.choose_episode unless @quit == "YES"
@@ -295,8 +315,12 @@ class PodcastFinder::CLI
       @episode_choice = nil
       self.browse_category
     else
-      if @input == "MORE" || @input.class == Fixnum
-        @input = "STUCK"
+      @input = "STUCK" unless @input == "EXIT" || @input == "HELP"
+      if @input == "HELP"
+        self.proceed_based_on_input
+        if @input == "BACK"
+          self.display_episode_info
+        end
       end
       self.proceed_based_on_input
       self.choose_action_episode_info unless @quit == "YES"

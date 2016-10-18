@@ -1,49 +1,57 @@
 class PodcastFinder::Scraper
 
-	attr_accessor :index, :categories
-
-	def scrape_page(url)
-		html = open(url)
-		@index = Nokogiri::HTML(html)
+	def self.scrape_page(url)
+	  Nokogiri::HTML(open(url))
 	end
 
-	def scrape_category_list(url)
-		self.scrape_page(url)
-		@categories = []
-		groups = @index.css('nav.global-navigation div.subnav.subnav-podcast-categories div.group')
+	def self.scrape_category_list(url)
+		groups = PodcastFinder::Scraper.scrape_page('http://www.npr.org/podcasts').css('nav.global-navigation div.subnav.subnav-podcast-categories div.group')
 		categories = groups.each do |group|
 			category_info = group.css('ul li')
 			category_info.each do |category_data|
-				category = {
+				PodcastFinder::Category.new({
 					:name => category_data.css('a').text,
 					:url => "http://www.npr.org" + category_data.css('a').attribute('href').value
-				}
-				@categories << category
+				})
 			end
 		end
-		@categories
 	end
 
 	# podcasts scraping
 
-	def scrape_podcasts(category_url)
+	def self.scrape_podcasts(category_url)
 		counter = 1
 		podcasts = []
 		until counter == "done" do
-			scrape_url = category_url + "/partials?start=#{counter}"
-			self.scrape_page(scrape_url)
-			if !@index.css('article').first.nil?
-				active_podcasts = @index.css('article.podcast-active')
+			category_page = scrape_page(scrape_url = category_url + "/partials?start=#{counter}")
+			if !category_page.css('article').first.nil?
+				active_podcasts = category_page.css('article.podcast-active')
 				active_podcasts.each {|podcast| podcasts << self.get_podcast_data(podcast)}
-				counter += @index.css('article').size
+				counter += category_page.css('article').size
 			else
 				counter = "done"
 			end
 		end
-		podcasts
+		PodcastFinder::Station.new_from_collection(podcasts)
+		self.import_podcasts(podcasts, category)
 	end
 
-	def get_podcast_data(podcast)
+	def self.import_podcasts(podcasts, category)
+		podcasts.each do |podcast_hash|
+			check_podcast = podcast_hash[:name]
+			if PodcastFinder::Podcast.find_by_name(check_podcast).nil?
+				podcast = PodcastFinder::Podcast.new(podcast_hash)
+				category.add_podcast(podcast)
+				station = PodcastFinder::Station.find_by_name(podcast_hash[:station])
+				station.add_podcast(podcast)
+			else
+				podcast = PodcastFinder::Podcast.find_by_name(check_podcast)
+				category.add_podcast(podcast)
+			end
+		end
+	end
+
+	def self.get_podcast_data(podcast)
 		data = {
 			:name => podcast.css('h1.title a').text,
 			:url => podcast.css('h1.title a').attribute('href').value,
@@ -52,8 +60,8 @@ class PodcastFinder::Scraper
 		}
 	end
 
-	def get_podcast_description(podcast_url)
-		self.scrape_page(podcast_url)
+	def self.get_podcast_description(podcast_url)
+		scrape_page(podcast_url)
 		if @index.css('div.detail-overview-content.col2 p').size == 1
 			text = @index.css('div.detail-overview-content.col2 p').text
 		elsif @indext.css('div.detail-overview-content.col2 p') > 1
@@ -64,9 +72,9 @@ class PodcastFinder::Scraper
 
 	#individual episode methods
 
-	def scrape_episodes(podcast_url)
+	def self.scrape_episodes(podcast_url)
 		episode_list = []
-		self.scrape_page(podcast_url)
+		scrape_page(podcast_url)
 		episodes = @index.css('section.podcast-section.episode-list article.item.podcast-episode')
 		episodes.each do |episode|
 			episode_data = self.get_episode_data(episode)
@@ -75,7 +83,7 @@ class PodcastFinder::Scraper
 		episode_list
 	end
 
-	def get_episode_data(episode)
+	def self.get_episode_data(episode)
 		#for an edge case where sometimes the first podcast has no file associated with it
 		if !episode.css('div.audio-module-tools').empty?
 			link = episode.css('div.audio-module-tools ul li a').attribute('href').value
