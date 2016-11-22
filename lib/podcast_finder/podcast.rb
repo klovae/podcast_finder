@@ -5,7 +5,7 @@ class PodcastFinder::Podcast
 
   @@all = []
 
-  def initialize(podcast_hash)
+  def initialize(podcast_hash) #can this use self.send?
     @name = podcast_hash[:name]
     @url = podcast_hash[:url]
     @description = nil

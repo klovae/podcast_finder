@@ -8,15 +8,6 @@ class PodcastFinder::DataImporter
 
   #helper methods for import_podcast_data
 
-  def self.import_stations(podcast_array)
-    podcast_array.each do |podcast_hash|
-      check_station = podcast_hash[:station]
-      if PodcastFinder::Station.find_by_name(check_station).nil?
-        station = PodcastFinder::Station.new(podcast_hash)
-      end
-    end
-  end
-
   def self.import_podcasts(podcast_array, category)
     podcast_array.each do |podcast_hash|
       check_podcast = podcast_hash[:name]

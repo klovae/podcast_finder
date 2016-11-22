@@ -5,7 +5,7 @@ class PodcastFinder::Station
 
   @@all = []
 
-  def initialize(podcast_hash)
+  def initialize(podcast_hash) #can this use self.send?
     @name = podcast_hash[:station]
     @url = podcast_hash[:station_url]
     @podcasts = []
@@ -19,7 +19,7 @@ class PodcastFinder::Station
     end
   end
 
-  def self.new_from_collection(podcasts)
+  def self.new_from_collection(podcasts) #i don't like this logic here
     podcasts.each do |podcast_hash|
 			check_station = podcast_hash[:station]
 			if self.find_by_name(check_station).nil?
