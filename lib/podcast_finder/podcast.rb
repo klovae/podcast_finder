@@ -1,4 +1,6 @@
-class PodcastFinder::Podcast
+class PodcastFinder::Podcast < CreateAndRead
+  include CreateAndRead::InstanceMethods
+  extend CreateAndRead::ClassMethods
 
   attr_accessor :name, :url
   attr_reader :station, :categories, :description, :episodes
@@ -33,26 +35,6 @@ class PodcastFinder::Podcast
 
   def description=(description)
     @description = description
-  end
-
-  def save
-    @@all << self
-  end
-
-  def self.all
-    @@all
-  end
-
-  def self.find_by_name(name)
-    self.all.detect {|item| item.name == name}
-  end
-
-  def self.find_or_create_by_name(hash)
-    if find_by_name(hash[:name]).nil?
-      self.new(hash)
-    else
-      find_by_name(hash[:name])
-    end
   end
 
 end

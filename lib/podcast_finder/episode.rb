@@ -1,4 +1,6 @@
-class PodcastFinder::Episode
+class PodcastFinder::Episode < CreateAndRead
+  include CreateAndRead::InstanceMethods
+  extend CreateAndRead::ClassMethods
 
   attr_accessor :date, :title, :description, :download_link, :length, :podcast
 

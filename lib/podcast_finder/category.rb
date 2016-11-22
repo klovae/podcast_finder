@@ -1,4 +1,6 @@
-class PodcastFinder::Category
+class PodcastFinder::Category < CreateAndRead
+  include CreateAndRead::InstanceMethods
+  extend CreateAndRead::ClassMethods
 
   attr_accessor :name, :url, :podcasts
 
@@ -8,14 +10,6 @@ class PodcastFinder::Category
     category_hash.each {|key, value| self.send("#{key}=", value)}
     @podcasts = []
     self.save
-  end
-
-  def save
-    @@all << self
-  end
-
-  def self.all
-    @@all
   end
 
   def add_podcast(podcast)
