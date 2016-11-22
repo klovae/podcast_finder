@@ -27,8 +27,14 @@ class PodcastFinder::Scraper
 		until counter == "done" do
 			category_page = scrape_page(scrape_url = category_url + "/partials?start=#{counter}")
 			if !category_page.css('article').first.nil?
-				active_podcasts = category_page.css('article.podcast-active')
-				active_podcasts.each {|podcast| podcasts << self.get_podcast_data(podcast)}
+				 active_podcasts = category_page.css('article.podcast-active')
+				 active_podcasts.each do |podcast|
+					 podcasts << data = {
+							:name => podcast.css('h1.title a').text,
+							:url => podcast.css('h1.title a').attribute('href').value,
+							:station => podcast.css('h3.org a').text,
+							:station_url => "http://www.npr.org" + podcast.css('h3.org a').attribute('href').value
+						}
 				counter += category_page.css('article').size
 			else
 				counter = "done"
@@ -43,37 +49,34 @@ class PodcastFinder::Scraper
 		end
 	end
 
-
-	def self.get_podcast_data(podcast)
-		data = {
-			:name => podcast.css('h1.title a').text,
-			:url => podcast.css('h1.title a').attribute('href').value,
-			:station => podcast.css('h3.org a').text,
-			:station_url => "http://www.npr.org" + podcast.css('h3.org a').attribute('href').value
-		}
-	end
-
-	def self.get_podcast_description(podcast_url)
-		scrape_page(podcast_url)
+	def self.get_podcast_description(podcast)
+		scrape_page(podcast.url)
 		if @index.css('div.detail-overview-content.col2 p').size == 1
 			text = @index.css('div.detail-overview-content.col2 p').text
-		elsif @indext.css('div.detail-overview-content.col2 p') > 1
+		elsif @index.css('div.detail-overview-content.col2 p') > 1
 			text = @index.css('div.detail-overview-content.col2 p').first.text
 		end
-			description = text.gsub(@index.css('div.detail-overview-content.col2 p a.more').text, "").gsub("\"", "'")
+		podcast.description = text.gsub(@index.css('div.detail-overview-content.col2 p a.more').text, "").gsub("\"", "'")
 	end
 
 	#individual episode methods
 
-	def self.scrape_episodes(podcast_url)
-		episode_list = []
-		scrape_page(podcast_url)
-		episodes = @index.css('section.podcast-section.episode-list article.item.podcast-episode')
-		episodes.each do |episode|
-			episode_data = self.get_episode_data(episode)
-			episode_list << episode_data unless episode_data[:download_link].nil? #unless is for edge case
+	def self.scrape_episodes(podcast)
+		if podcast.episodes == []
+			episode_list = []
+
+			scrape_page(podcast.url)
+			episodes = @index.css('section.podcast-section.episode-list article.item.podcast-episode')
+			episodes.each do |episode|
+				episode_data = self.get_episode_data(episode)
+				episode_list << episode_data unless episode_data[:download_link].nil? #unless is for edge case
+			end
+
+			episode_list.each do |episode_hash|
+				episode = PodcastFinder::Episode.new(episode_hash)
+				podcast.add_episode(episode)
+			end
 		end
-		episode_list
 	end
 
 	def self.get_episode_data(episode)
@@ -85,6 +88,7 @@ class PodcastFinder::Scraper
 			link = nil
 			length = nil
 		end
+
 		if episode.css('p').count > 1
 			paragraphs = episode.css('p')
 			p1 = paragraphs[0].text.gsub(episode.css('p.teaser time').text, "").gsub(/\n+\s*/, "").gsub("\"", "'")
@@ -93,7 +97,9 @@ class PodcastFinder::Scraper
 		else
 			description = episode.css('p.teaser').text.gsub(episode.css('p.teaser time').text, "").gsub(/\n+\s*/, "").gsub("\"", "'")
 		end
+
 		#end edge case
+
 		episode_data = {
 			:date => episode.css('time').attribute('datetime').value,
 			:title => episode.css('h2.title').text.gsub(/\n+\s*/, "").gsub("\"", "'"),

@@ -5,7 +5,7 @@ class PodcastFinder::Podcast
 
   @@all = []
 
-  def initialize(podcast_hash) #can this use self.send?
+  def initialize(podcast_hash)
     @name = podcast_hash[:name]
     @url = podcast_hash[:url]
     @description = nil
@@ -48,10 +48,10 @@ class PodcastFinder::Podcast
   end
 
   def self.find_or_create_by_name(hash)
-    if self.all.detect {|item| item.name == hash[:name]}.nil?
+    if find_by_name(hash[:name]).nil?
       self.new(hash)
     else
-      self.all.detect {|item| item.name == hash[:name]}
+      find_by_name(hash[:name])
     end
   end
 

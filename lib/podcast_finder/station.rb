@@ -19,15 +19,6 @@ class PodcastFinder::Station
     podcast.station = self
   end
 
-  def self.new_from_collection(podcasts) #i don't like this logic here
-    podcasts.each do |podcast_hash|
-			check_station = podcast_hash[:station]
-			if self.find_by_name(check_station).nil?
-				station = self.new(podcast_hash)
-			end
-		end
-  end
-
   def save
     @@all << self
   end
@@ -41,10 +32,10 @@ class PodcastFinder::Station
   end
 
   def self.find_or_create_by_name(hash)
-    if self.all.detect {|item| item.name == hash[:name]}.nil?
+    if find_by_name(hash[:name]).nil?
       self.new(hash)
     else
-      self.all.detect {|item| item.name == hash[:name]}
+      find_by_name(hash[:name])
     end
   end
 
