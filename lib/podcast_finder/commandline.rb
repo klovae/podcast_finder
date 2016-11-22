@@ -234,7 +234,7 @@ class PodcastFinder::CLI
       puts ""
       puts "#{@podcast_choice.name} Recent Episode List".colorize(:light_blue)
       @podcast_choice.episodes.each_with_index do |episode, index|
-        puts "(#{index + 1}) #{episode.title} - #{episode.display_date}" + "#{" - " + episode.length unless episode.length.nil?}"
+        puts "(#{index + 1}) #{episode.title} - #{episode.date.strftime('%B %-d, %Y')}" + "#{" - " + episode.length unless episode.length.nil?}"
       end
       puts ""
       puts "These are all the options currently available in Podcast Finder.".colorize(:light_blue)
