@@ -35,27 +35,13 @@ class PodcastFinder::Scraper
 			end
 		end
 
-		podcasts.each do |podcast_hash| #improvements below
-			if PodcastFinder::Podcast.find_by_name(podcast_hash[:name]).nil?
-				podcast = PodcastFinder::Podcast.new(podcast_hash)
-				if PodcastFinder::Station.find_by_name(podcast_hash[:station])
-					station = PodcastFinder::Station.find_by_name(podcast_hash[:station])
-				else
-					station = PodcastFinder::Station.new(podcast_hash)
-				end
-			else
-				podcast = PodcastFinder::Podcast.find_by_name(podcast_hash[:name])
-				station = PodcastFinder::Station.find_by_name(podcast_hash[:station])
-			end
+		podcasts.each do |podcast_hash|
+			station = PodcastFinder::Station.find_or_create_by_name(podcast_hash[:station])
+			podcast = PodcastFinder::Podcast.find_or_create_by_name(podcast_hash[:name])
 			category.add_podcast(podcast)
 			station.add_podcast(podcast)
-			end
 		end
-	endcategory.add_podcast
-
-	#if station doesn't exist, make it
-	#if podcast doesn't exit, make it and assign to station
-	#assign podcast to category
+	end
 
 
 	def self.get_podcast_data(podcast)

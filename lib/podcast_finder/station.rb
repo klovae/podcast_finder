@@ -13,10 +13,10 @@ class PodcastFinder::Station
   end
 
   def add_podcast(podcast)
-    if podcast.class == PodcastFinder::Podcast
+    if podcast.class == PodcastFinder::Podcast && self.class.all.detect {|item| item.name == name}.nil?
       @podcasts << podcast
-      podcast.station = self
     end
+    podcast.station = self
   end
 
   def self.new_from_collection(podcasts) #i don't like this logic here
@@ -38,6 +38,14 @@ class PodcastFinder::Station
 
   def self.find_by_name(name)
     self.all.detect {|item| item.name == name}
+  end
+
+  def self.find_or_create_by_name(hash)
+    if self.all.detect {|item| item.name == hash[:name]}.nil?
+      self.new(hash)
+    else
+      self.all.detect {|item| item.name == hash[:name]}
+    end
   end
 
 end

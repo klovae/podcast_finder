@@ -47,4 +47,12 @@ class PodcastFinder::Podcast
     self.all.detect {|item| item.name == name}
   end
 
+  def self.find_or_create_by_name(hash)
+    if self.all.detect {|item| item.name == hash[:name]}.nil?
+      self.new(hash)
+    else
+      self.all.detect {|item| item.name == hash[:name]}
+    end
+  end
+
 end
