@@ -31,22 +31,9 @@ class PodcastFinder::Podcast
     end
   end
 
-  def list_episodes
-    self.episodes.each_with_index do |episode, index|
-      puts "(#{index + 1}) #{episode.title} - #{episode.display_date}" + "#{" - " + episode.length unless episode.length.nil?}"
-    end
-  end
-
   def description=(description)
     @description = description
   end
-
-  def list_data
-    puts "Podcast: #{self.name}".colorize(:light_blue)
-    puts "Station:".colorize(:light_blue) + "#{self.station.name}"
-    puts "Description:".colorize(:light_blue) + " #{self.description}"
-  end
-
 
   def save
     @@all << self
