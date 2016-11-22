@@ -107,7 +107,7 @@ class PodcastFinder::CLI
     if @input.class == Fixnum && @input.between?(1, PodcastFinder::Category.all.size)
       @category_choice = PodcastFinder::Category.all[@input - 1]
       puts "Loading podcasts from #{@category_choice.name}, please wait..."
-      PodcastFinder::DataImporter.import_podcast_data(@category_choice)
+      PodcastFinder::Scraper.scrape_podcasts_and_stations(@category_choice)
       browse_category
     else
       if @input.class == Fixnum && !@input.between?(1, PodcastFinder::Category.all.size)
@@ -136,7 +136,7 @@ class PodcastFinder::CLI
   end
 
   def display_podcasts
-    @listed_podcasts = @category_choice.list_podcasts(@podcast_counter)
+    @listed_podcasts = list_podcasts(@podcast_counter)
     if @listed_podcasts == 10 && @category_choice.podcasts.size > @podcast_counter + @listed_podcasts
       puts ""
       puts "Enter the number of the podcast you'd like to check out (1-#{@podcast_counter + @listed_podcasts})".colorize(:light_blue)
@@ -197,7 +197,7 @@ class PodcastFinder::CLI
   def display_podcast_info
     @podcast_choice = @category_choice.podcasts[@input - 1]
     puts "Loading #{@podcast_choice.name}"
-    PodcastFinder::DataImporter.import_description()
+    PodcastFinder::Scraper.get_podcast_description(@podcast_choice)
     puts ""
     puts "Podcast: #{@podcast_choice.name}".colorize(:light_blue)
     puts "Station:".colorize(:light_blue) + "#{@podcast_choice.station.name}"
@@ -229,7 +229,7 @@ class PodcastFinder::CLI
 
   def display_episode_list
     puts "Getting episodes for #{@podcast_choice.name}"
-    PodcastFinder::DataImporter.import_episodes(@podcast_choice)
+    PodcastFinder::Scraper.scrape_episodes(@podcast_choice)
     if !@podcast_choice.episodes.empty?
       puts ""
       puts "#{@podcast_choice.name} Recent Episode List".colorize(:light_blue)
