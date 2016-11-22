@@ -15,10 +15,6 @@ class PodcastFinder::Episode
     @date = Date.parse(date_string, "%Y-%m-%d")
   end
 
-  def display_date #this belongs in the CLI
-    @date.strftime('%B %-d, %Y')
-  end
-
   def self.create_from_collection(episode_array)
     episode_array.each {|episode_hash| self.new(episode_hash)}
   end
