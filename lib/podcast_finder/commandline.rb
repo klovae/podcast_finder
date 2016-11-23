@@ -8,7 +8,7 @@ class PodcastFinder::CLI
 
   def call
     startup_sequence
-    until @quit == "YES"
+    until @quit == "YES" do
       browse_all_categories
     end
     puts "Thanks for using the Command Line Podcast Finder!"
@@ -93,7 +93,7 @@ class PodcastFinder::CLI
     @podcast_counter = 0
     puts ""
     puts "Main Menu: All Categories".colorize(:light_blue)
-    PodcastFinder::Category.each_with_index do |category, index|
+    PodcastFinder::Category.all.each_with_index do |category, index|
       puts "(#{index + 1}) #{category.name}"
     end
     puts ""
@@ -220,7 +220,6 @@ class PodcastFinder::CLI
     elsif @input == "MENU"
       proceed_based_on_input
     else
-
       @input = "STUCK" unless @input == "EXIT" || @input == "HELP"
       proceed_based_on_input
       choose_podcast_action unless @quit == "YES"
@@ -245,6 +244,7 @@ class PodcastFinder::CLI
       puts "Type 'back' to return to podcast listing for #{@category_choice.name}".colorize(:light_blue)
       puts "Type 'menu' to see the category list".colorize(:light_blue)
       choose_episode
+
     else #for edge case where a podcast has no associated episodes but is listed as active by website
       puts ""
       puts "Looks like #{@podcast_choice.name} doesn't have episodes online.".colorize(:light_red)
@@ -332,5 +332,5 @@ class PodcastFinder::CLI
       choose_action_episode_info unless @quit == "YES"
     end
   end
-
+end
 end

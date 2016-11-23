@@ -1,11 +1,15 @@
-class PodcastFinder::Podcast < CreateAndRead
-  include CreateAndRead::InstanceMethods
-  extend CreateAndRead::ClassMethods
+class PodcastFinder::Podcast < PodcastFinder::CreateAndRead
+  include PodcastFinder::CreateAndRead::InstanceMethods
+  extend PodcastFinder::CreateAndRead::ClassMethods
 
   attr_accessor :name, :url
   attr_reader :station, :categories, :description, :episodes
 
   @@all = []
+
+  def self.all
+    @@all
+  end
 
   def initialize(podcast_hash)
     @name = podcast_hash[:name]

@@ -19,22 +19,23 @@ class PodcastFinder::Scraper
 
 	# podcasts scraping
 
-	def self.scrape_podcasts_and_stations(category_url)
+	def self.scrape_podcasts_and_stations(category)
 		counter = 1
 		podcasts = []
 
 		#logic to deal with infinite scroll
 		until counter == "done" do
-			category_page = scrape_page(scrape_url = category_url + "/partials?start=#{counter}")
+			category_page = scrape_page("#{category.url}/partials?start=#{counter}")
 			if !category_page.css('article').first.nil?
 				 active_podcasts = category_page.css('article.podcast-active')
 				 active_podcasts.each do |podcast|
-					 podcasts << data = {
+					 podcasts << {
 							:name => podcast.css('h1.title a').text,
 							:url => podcast.css('h1.title a').attribute('href').value,
 							:station => podcast.css('h3.org a').text,
 							:station_url => "http://www.npr.org" + podcast.css('h3.org a').attribute('href').value
 						}
+				end
 				counter += category_page.css('article').size
 			else
 				counter = "done"
@@ -42,8 +43,8 @@ class PodcastFinder::Scraper
 		end
 
 		podcasts.each do |podcast_hash|
-			station = PodcastFinder::Station.find_or_create_by_name(podcast_hash[:station])
-			podcast = PodcastFinder::Podcast.find_or_create_by_name(podcast_hash[:name])
+			station = PodcastFinder::Station.find_or_create_by_name(podcast_hash[:station], podcast_hash)
+			podcast = PodcastFinder::Podcast.find_or_create_by_name(podcast_hash[:name], podcast_hash)
 			category.add_podcast(podcast)
 			station.add_podcast(podcast)
 		end
