@@ -51,13 +51,13 @@ class PodcastFinder::Scraper
 	end
 
 	def self.get_podcast_description(podcast)
-		scrape_page(podcast.url)
-		if @index.css('div.detail-overview-content.col2 p').size == 1
-			text = @index.css('div.detail-overview-content.col2 p').text
-		elsif @index.css('div.detail-overview-content.col2 p') > 1
-			text = @index.css('div.detail-overview-content.col2 p').first.text
+		podcast_page = scrape_page(podcast.url)
+		if podcast_page.css('div.detail-overview-content.col2 p').size == 1
+			text = podcast_page.css('div.detail-overview-content.col2 p').text
+		elsif podcas_paget.css('div.detail-overview-content.col2 p') > 1
+			text = podcast_page.css('div.detail-overview-content.col2 p').first.text
 		end
-		podcast.description = text.gsub(@index.css('div.detail-overview-content.col2 p a.more').text, "").gsub("\"", "'")
+		podcast.description = text.gsub(podcast_page.css('div.detail-overview-content.col2 p a.more').text, "").gsub("\"", "'")
 	end
 
 	#individual episode methods
@@ -65,9 +65,7 @@ class PodcastFinder::Scraper
 	def self.scrape_episodes(podcast)
 		if podcast.episodes == []
 			episode_list = []
-
-			scrape_page(podcast.url)
-			episodes = @index.css('section.podcast-section.episode-list article.item.podcast-episode')
+			episodes = scrape_page(podcast.url).css('section.podcast-section.episode-list article.item.podcast-episode')
 			episodes.each do |episode|
 				episode_data = self.get_episode_data(episode)
 				episode_list << episode_data unless episode_data[:download_link].nil? #unless is for edge case
